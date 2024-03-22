@@ -1,16 +1,69 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import { Link } from 'react-router-dom';
+import axios from "axios";
+import {ToastContainer,toast} from 'react-toastify';
+//css file for the toast
+import "react-toastify/dist/ReactToastify.css";
 import styled from "styled-components";
+import { registerRoute } from '../utils/APIRoute';
 const Register = ()=>{
-    const handleSubmit = (event)=>{
+    const [values,setValues] = useState({
+        username:'',
+        email:'',
+        password:'',
+        confirmPassword:''
+    })
+    const handleSubmit = async (event)=>{
         event.preventDefault()
         alert("form")
+       if(handleValidation()){
+        const  {password,username,email} = values;
+        const {data} = await axios.post(registerRoute,{
+            username,email,password
+        })
+       }
     }
+    const toastOptions = {
+        position:"bottom-right",
+        autoClose:8000,
+        pauseOnHover:true,
+        draggable:true,
+        theme:"dark"
+
+    }
+const handleValidation = ()=>{
+    const {password,confirmPassword,username,email} = values;
+   if(password!==confirmPassword){
+    toast.error("password and confirm password should be same.",toastOptions)
+    return false;
+   }
+   else if(username.length<3){
+toast.error("User name should be greater then 3 chareccters", toastOptions)
+return false;
+   }
+   else if(password.length<8){
+    toast.error("User password should be greater then 8 digits", toastOptions)
+    return false;
+}
+else if(email===""){
+    toast.error("User email should required", toastOptions)
+    return false;
+}
+return true;
+  
+}
+
+
+    // It uses the spread operator (...values) to create a copy of the current state object (values), 
+    //and then it updates the specific field ([event.target.name]) with the new value (event.target.value).
+    //By using [event.target.name], it dynamically updates the corresponding field in the state based on 
+    //the name attribute of the input field.
     const handleChange =(event)=>{
-       
+        setValues({...values,[event.target.name]:event.target.value})
     }
     return(
        <>
+     
         <FormContainer>
         <form onSubmit={handleSubmit}>
             <div className='brand'>
@@ -25,6 +78,7 @@ const Register = ()=>{
             <span>Already have a account ? <Link to='/login'>Login</Link></span>
         </form>
         </FormContainer>
+        <ToastContainer/>
        </>
     )
 }
@@ -96,16 +150,5 @@ form{
         }
     }
     
-}
-
-
-
-
-
-
-
-
-
-
-`;
+}`;
 export default Register;
